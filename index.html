@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HeartEase</title>
+<style>
+/* --- CSS --- */
+body {font-family: Arial, sans-serif; background: #f0f4f8; margin:0; padding:0;}
+header {text-align:center; background:#ff7eb9; color:white; padding:20px;}
+nav {display:flex; justify-content:center; flex-wrap:wrap; background:#ffd6e8;}
+nav button {margin:5px; padding:10px 15px; border:none; border-radius:5px; cursor:pointer;}
+nav button:hover {background:#ff92c1; color:white;}
+main {padding:20px;}
+.hidden {display:none;}
+#chatBox {border:1px solid #ccc; height:150px; overflow-y:auto; padding:5px; margin-bottom:10px; background:white;}
+#circle {width:100px; height:100px; background:#ff92c1; border-radius:50%; margin:20px auto; animation:none;}
+textarea {width:100%; padding:10px; margin-bottom:10px;}
+button {background:#ff7eb9; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer;}
+button:hover {background:#ff92c1;}
+@keyframes breath{
+  0% {transform: scale(1);}
+  50% {transform: scale(1.5);}
+  100% {transform: scale(1);}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>HeartEase</h1>
+  <p>Your Virtual Relationship & Stress Supporter</p>
+</header>
+
+<nav>
+  <button onclick="showSection('home')">Home</button>
+  <button onclick="showSection('mood')">Mood Tracker</button>
+  <button onclick="showSection('chat')">Chat</button>
+  <button onclick="showSection('exercise')">Exercises</button>
+  <button onclick="showSection('journal')">Journaling</button>
+</nav>
+
+<main>
+  <section id="home">
+    <h2>Welcome to HeartEase</h2>
+    <p>Check your mood, get tips, and relax!</p>
+  </section>
+
+  <section id="mood" class="hidden">
+    <h2>Mood Tracker</h2>
+    <label>How are you feeling today?</label>
+    <select id="moodSelect">
+      <option>Happy</option>
+      <option>Sad</option>
+      <option>Stressed</option>
+      <option>Anxious</option>
+      <option>Confused</option>
+    </select>
+    <button onclick="saveMood()">Save Mood</button>
+    <h3>Your Mood History:</h3>
+    <ul id="moodList"></ul>
+  </section>
+
+  <section id="chat" class="hidden">
+    <h2>Chat with HeartEase</h2>
+    <div id="chatBox"></div>
+    <input type="text" id="userInput" placeholder="Type your feeling...">
+    <button onclick="sendMessage()">Send</button>
+  </section>
+
+  <section id="exercise" class="hidden">
+    <h2>Guided Breathing Exercise</h2>
+    <p>Follow the circle animation and breathe in/out!</p>
+    <div id="circle"></div>
+    <button onclick="startBreathing()">Start Exercise</button>
+  </section>
+
+  <section id="journal" class="hidden">
+    <h2>Journaling</h2>
+    <textarea id="journalEntry" rows="5" placeholder="Write your thoughts here..."></textarea>
+    <button onclick="saveJournal()">Save Entry</button>
+    <h3>Your Journal Entries:</h3>
+    <ul id="journalList"></ul>
+  </section>
+</main>
+
+<script>
+// --- JS ---
+
+// Section Navigation
+function showSection(id){
+  const sections = document.querySelectorAll('main section');
+  sections.forEach(sec => sec.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// Mood Tracker
+function saveMood(){
+  const mood = document.getElementById('moodSelect').value;
+  let moods = JSON.parse(localStorage.getItem('moods')) || [];
+  moods.push(`${new Date().toLocaleDateString()}: ${mood}`);
+  localStorage.setItem('moods', JSON.stringify(moods));
+  renderMoods();
+}
+
+function renderMoods(){
+  const moodList = document.getElementById('moodList');
+  let moods = JSON.parse(localStorage.getItem('moods')) || [];
+  moodList.innerHTML = '';
+  moods.forEach(m => {
+    const li = document.createElement('li');
+    li.textContent = m;
+    moodList.appendChild(li);
+  });
+}
+renderMoods();
+
+// Simple Chat
+function sendMessage(){
+  const input = document.getElementById('userInput').value;
+  if(!input) return;
+  const chatBox = document.getElementById('chatBox');
+  const userMsg = document.createElement('div');
+  userMsg.textContent = "You: " + input;
+  chatBox.appendChild(userMsg);
+
+  // Simple response logic
+  const botMsg = document.createElement('div');
+  let response = "HeartEase: Keep calm, take a deep breath!";
+  if(input.toLowerCase().includes("sad")) response = "HeartEase: It's okay to feel sad, try journaling.";
+  else if(input.toLowerCase().includes("stressed")) response = "HeartEase: Try a 1-minute breathing exercise!";
+  else if(input.toLowerCase().includes("angry")) response = "HeartEase: Take a pause, breathe slowly.";
+  botMsg.textContent = response;
+  chatBox.appendChild(botMsg);
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+  document.getElementById('userInput').value = '';
+}
+
+// Breathing Exercise
+function startBreathing(){
+  const circle = document.getElementById('circle');
+  circle.style.animation = 'breath 4s infinite';
+}
+
+// Journaling
+function saveJournal(){
+  const entry = document.getElementById('journalEntry').value;
+  if(!entry) return;
+  let entries = JSON.parse(localStorage.getItem('journal')) || [];
+  entries.push(`${new Date().toLocaleDateString()}: ${entry}`);
+  localStorage.setItem('journal', JSON.stringify(entries));
+  document.getElementById('journalEntry').value = '';
+  renderJournal();
+}
+
+function renderJournal(){
+  const journalList = document.getElementById('journalList');
+  let entries = JSON.parse(localStorage.getItem('journal')) || [];
+  journalList.innerHTML = '';
+  entries.forEach(e => {
+    const li = document.createElement('li');
+    li.textContent = e;
+    journalList.appendChild(li);
+  });
+}
+renderJournal();
+</script>
+
+</body>
+</html>
